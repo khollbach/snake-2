@@ -58,10 +58,33 @@ int main() {
 
     p1.pos = {13, 10};
     p1.color = magenta;
+    p1.dir = zero;
 
     p2.pos = {26, 10};
     p2.color = dark_blue;
+    p2.dir = zero;
 
+    // Draw initial positions.
+    draw(&p1);
+    draw(&p2);
+
+    // Wait until both player input an initial direction.
+    // Then move them each one step.
+    while (1) {
+        key = cgetc();
+        dir = p1_dir(key);
+        if (dir != zero) p1.dir = dir;
+        dir = p2_dir(key);
+        if (dir != zero) p2.dir = dir;
+
+        if (p1.dir != zero && p2.dir != zero) {
+            move(&p1);
+            move(&p2);
+            break;
+        }
+    }
+
+    // Game loop.
     while (1) {
         draw(&p1);
         draw(&p2);
@@ -85,7 +108,8 @@ int main() {
             return main(); // restart
         }
     }
-    return 0;
+
+    return 0; // unreachable
 }
 
 // Check for collisions with a wall or a snake's "tail".
