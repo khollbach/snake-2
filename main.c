@@ -35,8 +35,8 @@ enum low_res_color {
 };
 
 typedef struct {
-    i8 x,
-    i8 y,
+    i8 x;
+    i8 y;
 } point;
 
 const point zero = {0, 0};
@@ -47,6 +47,21 @@ typedef struct {
     u8 color;
 } player;
 
+bool check_gameover(player *p1, player *p2);
+bool in_bounds(point p);
+u8 try_getc();
+void draw(player *p);
+void move(player *p);
+void move_backwards(player *p);
+bool eq(point p1, point p2);
+bool nonzero(point p);
+point p1_dir(u8 key);
+point p2_dir(u8 key);
+void gr(bool enable);
+void gr_clear();
+void draw_pixel(point p, u8 color);
+u16 coord_to_addr(point p);
+
 int main() {
     player p1, p2;
     u16 i;
@@ -56,11 +71,13 @@ int main() {
     gr(true);
     gr_clear();
 
-    p1.pos = {13, 10};
+    p1.pos.x = 13;
+    p1.pos.y = 10;
     p1.color = magenta;
     p1.dir = zero;
 
-    p2.pos = {26, 10};
+    p2.pos.x = 26;
+    p2.pos.y = 10;
     p2.color = dark_blue;
     p2.dir = zero;
 
@@ -73,11 +90,11 @@ int main() {
     while (1) {
         key = cgetc();
         dir = p1_dir(key);
-        if (dir != zero) p1.dir = dir;
+        if (nonzero(dir)) p1.dir = dir;
         dir = p2_dir(key);
-        if (dir != zero) p2.dir = dir;
+        if (nonzero(dir)) p2.dir = dir;
 
-        if (p1.dir != zero && p2.dir != zero) {
+        if (nonzero(p1.dir) && nonzero(p2.dir)) {
             move(&p1);
             move(&p2);
             break;
@@ -96,9 +113,9 @@ int main() {
             // a similar amount of time, regardless of whether a key is pressed.
 
             dir = p1_dir(key);
-            if (dir != zero) p1.dir = dir;
+            if (nonzero(dir)) p1.dir = dir;
             dir = p2_dir(key);
-            if (dir != zero) p2.dir = dir;
+            if (nonzero(dir)) p2.dir = dir;
         }
 
         move(&p1);
@@ -122,8 +139,8 @@ bool check_gameover(player *p1, player *p2) {
     bool p1_loss, p2_loss, gameover;
     u16 i, j;
 
-    p1_loss = !in_bounds(p1.pos) || READ(coord_to_addr(p1.pos));
-    p2_loss = !in_bounds(p2.pos) || READ(coord_to_addr(p2.pos));
+    p1_loss = !in_bounds(p1->pos) || READ(coord_to_addr(p1->pos));
+    p2_loss = !in_bounds(p2->pos) || READ(coord_to_addr(p2->pos));
     gameover = p1_loss || p2_loss;
 
     // Death animation: blink the snake's head for the losing player(s).
@@ -131,12 +148,12 @@ bool check_gameover(player *p1, player *p2) {
         if (p1_loss) move_backwards(p1);
         if (p2_loss) move_backwards(p2);
         for (i = 0; i < 8; i++) {
-            if i % 2 == 0 {
-                if (p1_loss) draw_pixel(p1.pos, black);
-                if (p2_loss) draw_pixel(p2.pos, black);
+            if (i % 2 == 0) {
+                if (p1_loss) draw_pixel(p1->pos, black);
+                if (p2_loss) draw_pixel(p2->pos, black);
             } else {
-                draw_pixel(p1.pos, p1.color);
-                draw_pixel(p2.pos, p2.color);
+                draw_pixel(p1->pos, p1->color);
+                draw_pixel(p2->pos, p2->color);
             }
             for (j = 0; j < 500; j++); // timing
         }
@@ -148,7 +165,7 @@ bool check_gameover(player *p1, player *p2) {
 bool in_bounds(point p) {
     i8 x_dim = 40;
     i8 y_dim = 20; // todo: update to 24 and use fullscreen mode?
-    return 0 <= p.x && p.x < x_max && 0 <= p.y && p.y < y_max;
+    return 0 <= p.x && p.x < x_dim && 0 <= p.y && p.y < y_dim;
 }
 
 // Non-blocking keyboard input.
@@ -163,51 +180,69 @@ u8 try_getc() {
 }
 
 void draw(player *p) {
-    draw_pixel(p.pos, p.color);
+    draw_pixel(p->pos, p->color);
 }
 
 void move(player *p) {
-    p.pos.x += p.dir.x;
-    p.pos.y += p.dir.y;
+    p->pos.x += p->dir.x;
+    p->pos.y += p->dir.y;
 }
 
 void move_backwards(player *p) {
-    p.pos.x -= p.dir.x;
-    p.pos.y -= p.dir.y;
+    p->pos.x -= p->dir.x;
+    p->pos.y -= p->dir.y;
+}
+
+bool eq(point p1, point p2) {
+    return p1.x == p2.x && p1.y == p2.y;
+}
+
+bool nonzero(point p) {
+    return !eq(p, zero);
 }
 
 // WASD to move in a cardinal direction.
 // All other keys return 0.
 point p1_dir(u8 key) {
+    point p;
+    p.x = p.y = 0;
     switch (key) {
     case 87: case 119: // up
-        return {0, -1};
+        p.y = -1;
+        break;
     case 83: case 115: // down
-        return {0, 1};
+        p.y = 1;
+        break;
     case 65: case 97: // left
-        return {-1, 0};
+        p.x = -1;
+        break;
     case 68: case 100: // right
-        return {1, 0};
-    default:
-        return {0, 0};
+        p.x = 1;
+        break;
     }
+    return p;
 }
 
 // OKL; to move in a cardinal direction.
 // All other keys return 0.
 point p2_dir(u8 key) {
+    point p;
+    p.x = p.y = 0;
     switch (key) {
     case 79: case 111: // up
-        return {0, -1};
+        p.y = -1;
+        break;
     case 76: case 108: // down
-        return {0, 1};
+        p.y = 1;
+        break;
     case 75: case 107: // left
-        return {-1, 0};
+        p.x = -1;
+        break;
     case 58: case 59: // right
-        return {1, 0};
-    default:
-        return {0, 0};
+        p.x = 1;
+        break;
     }
+    return p;
 }
 
 // Toggle graphics mode.
@@ -224,21 +259,21 @@ void gr_clear() {
     memset(ADDR(0x400), 0, 0x400);
 }
 
-void draw_pixel(u8 x, u8 y, u8 color) {
-    WRITE(coord_to_addr(x, y), color << 4 | color);
+void draw_pixel(point p, u8 color) {
+    WRITE(coord_to_addr(p), color << 4 | color);
 }
 
 // What is the memory address for this low-res pixel?
 //
 // Note that there's technically a "top-half" and a "bottom-half"
 // to each of these "pixels". Each can hold a 4-bit color.
-u16 coord_to_addr(u8 x, u8 y) {
+u16 coord_to_addr(point p) {
     u8 group;
     u16 base, offset;
-    assert(x < 40);
-    assert(y < 24);
+    assert(p.x < 40);
+    assert(p.y < 24);
 
-    group = y / 8;
+    group = p.y / 8;
     switch (group) {
     case 0:
         base = 0x400;
@@ -251,7 +286,7 @@ u16 coord_to_addr(u8 x, u8 y) {
         break;
     }
 
-    offset = y % 8 * 0x80;
+    offset = p.y % 8 * 0x80;
 
-    return base + offset + x;
+    return base + offset + p.x;
 }
