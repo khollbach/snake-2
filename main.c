@@ -49,6 +49,7 @@ typedef struct {
 } player;
 
 void play(u8 p1_color, u8 p2_color);
+void print_ready(bool p1, bool p2);
 bool check_gameover(player *p1, player *p2);
 void draw_walls();
 bool in_bounds(point p);
@@ -86,10 +87,6 @@ void play(u8 p1_start_color, u8 p2_start_color) {
     point dir;
     point p1_input, p2_input;
 
-    gr(true);
-    mixed(false);
-    gr_clear();
-
     p1.pos.x = 13;
     p1.pos.y = 10;
     p1.color = p1_start_color;
@@ -100,15 +97,25 @@ void play(u8 p1_start_color, u8 p2_start_color) {
     p2.color = p2_start_color;
     p2.dir = zero;
 
+    gr(true);
+    gr_clear();
+
     // Draw initial positions.
     draw(&p1);
     draw(&p2);
 
+    // Show instructions.
+    mixed(true);
+    cprintf("   W                               I    \r\n");
+    cprintf("  ASD                             JKL   \r\n");
+    cprintf("                                        \r\n");
+
     // Wait until both players input an initial direction.
     // Then move them each one step.
     while (1) {
-        key = cgetc();
+        print_ready(nonzero(p1.dir), nonzero(p2.dir));
 
+        key = cgetc();
         dir = p1_dir(key);
         if (nonzero(dir)) p1.dir = dir;
         dir = p2_dir(key);
@@ -135,6 +142,9 @@ void play(u8 p1_start_color, u8 p2_start_color) {
         }
     }
 
+    // Erase instructions, and use the full screen for the arena.
+    mixed(false);
+    gr_clear();
     draw_walls();
 
     // Game loop.
@@ -170,6 +180,19 @@ void play(u8 p1_start_color, u8 p2_start_color) {
     }
 
     assert(false); // unreachable
+}
+
+void print_ready(bool p1, bool p2) {
+    if (!p1 && !p2) {
+        cprintf("\rPLAYER 1                        PLAYER 2");
+    } else if (!p1 && p2) {
+        cprintf("\rPLAYER 1                         READY! ");
+    } else if (p1 && !p2) {
+        cprintf("\r READY !                        PLAYER 2");
+    } else {
+        assert(p1 && p2);
+        cprintf("\r READY!                          READY! ");
+    }
 }
 
 // Check for collisions with a wall or a snake's "tail".
