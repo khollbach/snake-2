@@ -289,22 +289,22 @@ point p1_dir(u8 key) {
     return p;
 }
 
-// OKL; to move in a cardinal direction.
+// IJKL to move in a cardinal direction.
 // All other keys return 0.
 point p2_dir(u8 key) {
     point p;
     p.x = p.y = 0;
     switch (key) {
-    case 79: case 111: // up
+    case 73: case 105: // up
         p.y = -1;
         break;
-    case 76: case 108: // down
+    case 74: case 106: // down
         p.y = 1;
         break;
     case 75: case 107: // left
         p.x = -1;
         break;
-    case 58: case 59: // right
+    case 76: case 108: // right
         p.x = 1;
         break;
     }

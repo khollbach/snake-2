@@ -7,4 +7,4 @@
     [x] translate keycodes into colors, for both players
     [x] add logic to the first-input loop to set player color
     [x] remember each player's color between games
-
+[ ] instructions between games
