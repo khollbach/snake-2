@@ -58,6 +58,7 @@ bool nonzero(point p);
 point p1_dir(u8 key);
 point p2_dir(u8 key);
 void gr(bool enable);
+void mixed(bool enable);
 void gr_clear();
 void draw_pixel(point p, u8 color);
 u16 coord_to_addr(point p);
@@ -69,6 +70,7 @@ int main() {
     point dir;
 
     gr(true);
+    mixed(false);
     gr_clear();
 
     p1.pos.x = 13;
@@ -106,7 +108,7 @@ int main() {
         draw(&p1);
         draw(&p2);
 
-        for (i = 0; i < 1000; i++) {
+        for (i = 0; i < 20; i++) {
             key = try_getc();
 
             // Note that we always run the loop body, so that each "tick" takes
@@ -148,14 +150,9 @@ bool check_gameover(player *p1, player *p2) {
         if (p1_loss) move_backwards(p1);
         if (p2_loss) move_backwards(p2);
         for (i = 0; i < 8; i++) {
-            if (i % 2 == 0) {
-                if (p1_loss) draw_pixel(p1->pos, black);
-                if (p2_loss) draw_pixel(p2->pos, black);
-            } else {
-                draw_pixel(p1->pos, p1->color);
-                draw_pixel(p2->pos, p2->color);
-            }
-            for (j = 0; j < 500; j++); // timing
+            if (p1_loss) draw_pixel(p1->pos, i % 2 ? p1->color : black);
+            if (p2_loss) draw_pixel(p2->pos, i % 2 ? p2->color : black);
+            for (j = 0; j < 1000; j++); // timing
         }
     }
 
@@ -164,7 +161,7 @@ bool check_gameover(player *p1, player *p2) {
 
 bool in_bounds(point p) {
     i8 x_dim = 40;
-    i8 y_dim = 20; // todo: update to 24 and use fullscreen mode?
+    i8 y_dim = 24;
     return 0 <= p.x && p.x < x_dim && 0 <= p.y && p.y < y_dim;
 }
 
@@ -251,6 +248,15 @@ void gr(bool enable) {
         WRITE(0xC050, 0); // text mode off
     } else {
         WRITE(0xC051, 0); // text mode on
+    }
+}
+
+// Toggle mixed graphics and text.
+void mixed(bool enable) {
+    if (enable) {
+        WRITE(0xC053, 0);
+    } else {
+        WRITE(0xC052, 0);
     }
 }
 
