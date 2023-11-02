@@ -35,16 +35,54 @@ enum low_res_color {
 };
 
 int main() {
-    cprintf("hello world!\r\n");
+    gr(true);
+    gr_clear();
+    draw(20, 10, red);
     return 0;
 }
 
-// Activate graphics mode.
-void gr() {
-    WRITE(0xC050, 0);
+// Toggle graphics mode.
+void gr(bool enable) {
+    if (enable) {
+        WRITE(0xC050, 0); // text mode off
+    } else {
+        WRITE(0xC051, 0); // text mode on
+    }
 }
 
 // Write black to all pixels in low-res page 1.
 void gr_clear() {
     memset(ADDR(0x400), 0, 0x400);
+}
+
+void draw(u8 x, u8 y, u8 color) {
+    WRITE(gr_coord_to_addr(x, y), color << 4 | color);
+}
+
+// What is the memory address for this low-res pixel?
+//
+// Note that there's technically a "top-half" and a "bottom-half"
+// to each of these "pixels". Each can hold a 4-bit color.
+u16 gr_coord_to_addr(u8 x, u8 y) {
+    u8 group;
+    u16 base, offset;
+    assert(x < 40);
+    assert(y < 24);
+
+    group = y / 8;
+    switch (group) {
+    case 0:
+        base = 0x400;
+        break;
+    case 1:
+        base = 0x428;
+        break;
+    case 2:
+        base = 0x450;
+        break;
+    }
+
+    offset = y % 8 * 0x80;
+
+    return base + offset + x;
 }
