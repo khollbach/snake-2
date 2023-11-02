@@ -1,5 +1,5 @@
-* use the whole screen height of 24
-* draw borders, so the users know where the walls are
+[x] use the whole screen height of 24
+[x] draw borders, so the users know where the walls are
     - use grey for this
 * prevent players from moving back into themselves
     (can deal with the input-swallowing, no-buffer feeling later)

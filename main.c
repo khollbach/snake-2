@@ -40,6 +40,7 @@ typedef struct {
 } point;
 
 const point zero = {0, 0};
+const point dims = {40, 24};
 
 typedef struct {
     point pos;
@@ -48,6 +49,7 @@ typedef struct {
 } player;
 
 bool check_gameover(player *p1, player *p2);
+void draw_walls();
 bool in_bounds(point p);
 u8 try_getc();
 void draw(player *p);
@@ -102,6 +104,8 @@ int main() {
             break;
         }
     }
+
+    draw_walls();
 
     // Game loop.
     while (1) {
@@ -159,10 +163,31 @@ bool check_gameover(player *p1, player *p2) {
     return gameover;
 }
 
+// Draw walls around the edge of the arena.
+void draw_walls() {
+    i8 x, y;
+    point p;
+    for (x = 0; x < dims.x; x++) {
+        p.x = x;
+        p.y = 0;
+        draw_pixel(p, grey_1);
+        p.x = x;
+        p.y = dims.y - 1;
+        draw_pixel(p, grey_1);
+    }
+    for (y = 0; y < dims.y; y++) {
+        p.x = 0;
+        p.y = y;
+        draw_pixel(p, grey_1);
+        p.x = dims.x - 1;
+        p.y = y;
+        draw_pixel(p, grey_1);
+    }
+}
+
 bool in_bounds(point p) {
-    i8 x_dim = 40;
-    i8 y_dim = 24;
-    return 0 <= p.x && p.x < x_dim && 0 <= p.y && p.y < y_dim;
+    // off-by-ones to account for walls around the edge of the area
+    return 1 <= p.x && p.x < dims.x - 1 && 1 <= p.y && p.y < dims.y - 1;
 }
 
 // Non-blocking keyboard input.
