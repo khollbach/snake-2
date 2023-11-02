@@ -49,6 +49,7 @@ typedef struct {
 
 int main() {
     player p1, p2;
+    u16 i;
     u8 key;
     point dir;
 
@@ -80,15 +81,44 @@ int main() {
         move(&p1);
         move(&p2);
 
-        // Restart upon colliding with a wall or a snake's "tail".
-        if (!in_bounds(p1.pos) || READ(coord_to_addr(p1.pos))) {
-            return main();
-        }
-        if (!in_bounds(p2.pos) || READ(coord_to_addr(p2.pos))) {
-            return main();
+        if (check_gameover(&p1, &p2)) {
+            return main(); // restart
         }
     }
     return 0;
+}
+
+// Check for collisions with a wall or a snake's "tail".
+//
+// If collision is detected, do a "death" animation for the losing player(s),
+// and return true.
+//
+// If no collision, return false.
+bool check_gameover(player *p1, player *p2) {
+    bool p1_loss, p2_loss, gameover;
+    u16 i, j;
+
+    p1_loss = !in_bounds(p1.pos) || READ(coord_to_addr(p1.pos));
+    p2_loss = !in_bounds(p2.pos) || READ(coord_to_addr(p2.pos));
+    gameover = p1_loss || p2_loss;
+
+    // Death animation: blink the snake's head for the losing player(s).
+    if (gameover) {
+        if (p1_loss) move_backwards(p1);
+        if (p2_loss) move_backwards(p2);
+        for (i = 0; i < 8; i++) {
+            if i % 2 == 0 {
+                if (p1_loss) draw_pixel(p1.pos, black);
+                if (p2_loss) draw_pixel(p2.pos, black);
+            } else {
+                draw_pixel(p1.pos, p1.color);
+                draw_pixel(p2.pos, p2.color);
+            }
+            for (j = 0; j < 500; j++); // timing
+        }
+    }
+
+    return gameover;
 }
 
 bool in_bounds(point p) {
@@ -115,6 +145,11 @@ void draw(player *p) {
 void move(player *p) {
     p.pos.x += p.dir.x;
     p.pos.y += p.dir.y;
+}
+
+void move_backwards(player *p) {
+    p.pos.x -= p.dir.x;
+    p.pos.y -= p.dir.y;
 }
 
 // WASD to move in a cardinal direction.
