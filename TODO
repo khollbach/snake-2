@@ -3,7 +3,8 @@
     - use grey for this
 [x] prevent players from moving back into themselves
     (can deal with the input-swallowing, no-buffer feeling later)
-* choose your color!
-    - map out the details a bit first
-
+[x] choose your color!
+    [x] translate keycodes into colors, for both players
+    [x] add logic to the first-input loop to set player color
+    [x] remember each player's color between games
 

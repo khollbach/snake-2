@@ -48,6 +48,7 @@ typedef struct {
     u8 color;
 } player;
 
+void play(u8 p1_color, u8 p2_color);
 bool check_gameover(player *p1, player *p2);
 void draw_walls();
 bool in_bounds(point p);
@@ -55,10 +56,13 @@ u8 try_getc();
 void draw(player *p);
 void move(player *p);
 void move_backwards(player *p);
+point plus(point p1, point p2);
 bool eq(point p1, point p2);
 bool nonzero(point p);
 point p1_dir(u8 key);
 point p2_dir(u8 key);
+u8 p1_color(u8 keypress);
+u8 p2_color(u8 keypress);
 void gr(bool enable);
 void mixed(bool enable);
 void gr_clear();
@@ -66,9 +70,19 @@ void draw_pixel(point p, u8 color);
 u16 coord_to_addr(point p);
 
 int main() {
+    play(magenta, dark_blue);
+    assert(false); // unreachable
+    return 0;
+}
+
+// Automatically restarts after each game ends.
+// Player color is remembered between games.
+//
+// Returns never.
+void play(u8 p1_start_color, u8 p2_start_color) {
     player p1, p2;
     u16 i;
-    u8 key;
+    u8 key, color;
     point dir;
     point p1_input, p2_input;
 
@@ -78,12 +92,12 @@ int main() {
 
     p1.pos.x = 13;
     p1.pos.y = 10;
-    p1.color = magenta;
+    p1.color = p1_start_color;
     p1.dir = zero;
 
     p2.pos.x = 26;
     p2.pos.y = 10;
-    p2.color = dark_blue;
+    p2.color = p2_start_color;
     p2.dir = zero;
 
     // Draw initial positions.
@@ -94,10 +108,25 @@ int main() {
     // Then move them each one step.
     while (1) {
         key = cgetc();
+
         dir = p1_dir(key);
         if (nonzero(dir)) p1.dir = dir;
         dir = p2_dir(key);
         if (nonzero(dir)) p2.dir = dir;
+
+        // Also check for color-changes.
+        // Player 1 can press keys on the number row to change color.
+        // Player 2 can do the same while holding shift.
+        color = p1_color(key);
+        if (color != 0) {
+            p1.color = color;
+            draw(&p1);
+        }
+        color = p2_color(key);
+        if (color != 0) {
+            p2.color = color;
+            draw(&p2);
+        }
 
         if (nonzero(p1.dir) && nonzero(p2.dir)) {
             move(&p1);
@@ -124,9 +153,9 @@ int main() {
 
             // Note: players can't move backwards into themselves.
             dir = p1_dir(key);
-            if (nonzero(dir) && nonzero(plus(dir, p1.dir)) p1_input = dir;
+            if (nonzero(dir) && nonzero(plus(dir, p1.dir))) p1_input = dir;
             dir = p2_dir(key);
-            if (nonzero(dir) && nonzero(plus(dir, p2.dir)) p2_input = dir;
+            if (nonzero(dir) && nonzero(plus(dir, p2.dir))) p2_input = dir;
         }
         p1.dir = p1_input;
         p2.dir = p2_input;
@@ -135,11 +164,12 @@ int main() {
         move(&p2);
 
         if (check_gameover(&p1, &p2)) {
-            return main(); // restart
+            // note: this will overflow the stack after a couple hundred games
+            play(p1.color, p2.color); // restart
         }
     }
 
-    return 0; // unreachable
+    assert(false); // unreachable
 }
 
 // Check for collisions with a wall or a snake's "tail".
@@ -279,6 +309,52 @@ point p2_dir(u8 key) {
         break;
     }
     return p;
+}
+
+// Return a non-black color code if the keypress is any of:
+// `1234567890-=
+//
+// Return black (0) otherwise.
+u8 p1_color(u8 keypress) {
+    switch (keypress) {
+    case 96: return 1;
+    case 49: return 2;
+    case 50: return 3;
+    case 51: return 4;
+    case 52: return 6;
+    case 53: return 7; // skip grey_1
+    case 54: return 8;
+    case 55: return 9;
+    case 56: return 11;
+    case 57: return 12; // skip grey_2
+    case 48: return 13;
+    case 45: return 14;
+    case 61: return 15;
+    default: return 0;
+    }
+}
+
+// Return a non-black color code if the keypress is any of:
+// ~!@#$%^&*()_+
+//
+// Return black (0) otherwise.
+u8 p2_color(u8 keypress) {
+    switch (keypress) {
+    case 126: return 1;
+    case 33: return 2;
+    case 64: return 3;
+    case 35: return 4;
+    case 36: return 6;
+    case 37: return 7; // skip grey_1
+    case 94: return 8;
+    case 38: return 9;
+    case 42: return 11;
+    case 40: return 12; // skip grey_2
+    case 41: return 13;
+    case 95: return 14;
+    case 43: return 15;
+    default: return 0;
+    }
 }
 
 // Toggle graphics mode.
