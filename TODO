@@ -1,11 +1,9 @@
 [x] use the whole screen height of 24
 [x] draw borders, so the users know where the walls are
     - use grey for this
-* prevent players from moving back into themselves
+[x] prevent players from moving back into themselves
     (can deal with the input-swallowing, no-buffer feeling later)
 * choose your color!
     - map out the details a bit first
-
-
 
 

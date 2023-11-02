@@ -70,6 +70,7 @@ int main() {
     u16 i;
     u8 key;
     point dir;
+    point p1_input, p2_input;
 
     gr(true);
     mixed(false);
@@ -89,7 +90,7 @@ int main() {
     draw(&p1);
     draw(&p2);
 
-    // Wait until both player input an initial direction.
+    // Wait until both players input an initial direction.
     // Then move them each one step.
     while (1) {
         key = cgetc();
@@ -112,17 +113,23 @@ int main() {
         draw(&p1);
         draw(&p2);
 
+        // Wait for one "tick", while polling for player input.
+        p1_input = p1.dir;
+        p2_input = p2.dir;
         for (i = 0; i < 20; i++) {
             key = try_getc();
 
             // Note that we always run the loop body, so that each "tick" takes
             // a similar amount of time, regardless of whether a key is pressed.
 
+            // Note: players can't move backwards into themselves.
             dir = p1_dir(key);
-            if (nonzero(dir)) p1.dir = dir;
+            if (nonzero(dir) && nonzero(plus(dir, p1.dir)) p1_input = dir;
             dir = p2_dir(key);
-            if (nonzero(dir)) p2.dir = dir;
+            if (nonzero(dir) && nonzero(plus(dir, p2.dir)) p2_input = dir;
         }
+        p1.dir = p1_input;
+        p2.dir = p2_input;
 
         move(&p1);
         move(&p2);
@@ -213,6 +220,13 @@ void move(player *p) {
 void move_backwards(player *p) {
     p->pos.x -= p->dir.x;
     p->pos.y -= p->dir.y;
+}
+
+point plus(point p1, point p2) {
+    point p;
+    p.x = p1.x + p2.x;
+    p.y = p1.y + p2.y;
+    return p;
 }
 
 bool eq(point p1, point p2) {
