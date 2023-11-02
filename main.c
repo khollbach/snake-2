@@ -34,21 +34,33 @@ enum low_res_color {
     white = 15,
 };
 
+typedef struct {
+    u8 x;
+    u8 y;
+} player;
+
 int main() {
-    u8 x, y, key, dx, dy;
+    player p1, p2;
+    u8 key, dx, dy;
 
     gr(true);
     gr_clear();
 
-    x = 20;
-    y = 10;
+    p1.x = 13;
+    p1.y = 10;
+    p1.x = 26;
+    p1.y = 10;
     while (1) {
-        draw(x, y, red);
+        draw(p1.x, p1.y, magenta);
+        draw(p2.x, p2.y, dark_blue);
 
         key = cgetc();
         p1_dir(key, &dx, &dy);
-        x += dx;
-        y += dy;
+        p1.x += dx;
+        p1.y += dy;
+        p2_dir(key, &dx, &dy);
+        p2.x += dx;
+        p2.y += dy;
     }
     return 0;
 }
@@ -68,6 +80,26 @@ void p1_dir(u8 key, u8 *dx, u8 *dy) {
         key_x = -1;
         break;
     case 68: case 100: // right
+        key_x = 1;
+        break;
+    }
+}
+
+// OKL; to move in a cardinal direction.
+// All other keys return 0.
+void p2_dir(u8 key, u8 *dx, u8 *dy) {
+    *dx = *dy = 0;
+    switch (key) {
+    case 79: case 111: // up
+        key_y = -1;
+        break;
+    case 76: case 108: // down
+        key_y = 1;
+        break;
+    case 75: case 107: // left
+        key_x = -1;
+        break;
+    case 58: case 59: // right
         key_x = 1;
         break;
     }
