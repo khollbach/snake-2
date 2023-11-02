@@ -80,11 +80,11 @@ int main() {
         move(&p1);
         move(&p2);
 
-        // Restart on wall collide.
-        if (!in_bounds(p1.pos)) {
+        // Restart upon colliding with a wall or a snake's "tail".
+        if (!in_bounds(p1.pos) || READ(coord_to_addr(p1.pos))) {
             return main();
         }
-        if (!in_bounds(p2.pos)) {
+        if (!in_bounds(p2.pos) || READ(coord_to_addr(p2.pos))) {
             return main();
         }
     }
@@ -166,14 +166,14 @@ void gr_clear() {
 }
 
 void draw_pixel(u8 x, u8 y, u8 color) {
-    WRITE(gr_coord_to_addr(x, y), color << 4 | color);
+    WRITE(coord_to_addr(x, y), color << 4 | color);
 }
 
 // What is the memory address for this low-res pixel?
 //
 // Note that there's technically a "top-half" and a "bottom-half"
 // to each of these "pixels". Each can hold a 4-bit color.
-u16 gr_coord_to_addr(u8 x, u8 y) {
+u16 coord_to_addr(u8 x, u8 y) {
     u8 group;
     u16 base, offset;
     assert(x < 40);
