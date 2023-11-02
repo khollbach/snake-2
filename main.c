@@ -79,8 +79,22 @@ int main() {
 
         move(&p1);
         move(&p2);
+
+        // Restart on wall collide.
+        if (!in_bounds(p1.pos)) {
+            return main();
+        }
+        if (!in_bounds(p2.pos)) {
+            return main();
+        }
     }
     return 0;
+}
+
+bool in_bounds(point p) {
+    i8 x_dim = 40;
+    i8 y_dim = 20; // todo: update to 24 and use fullscreen mode?
+    return 0 <= p.x && p.x < x_max && 0 <= p.y && p.y < y_max;
 }
 
 // Non-blocking keyboard input.
