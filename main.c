@@ -35,73 +35,105 @@ enum low_res_color {
 };
 
 typedef struct {
-    u8 x;
-    u8 y;
+    i8 x,
+    i8 y,
+} point;
+
+const point zero = {0, 0};
+
+typedef struct {
+    point pos;
+    point dir;
+    u8 color;
 } player;
 
 int main() {
     player p1, p2;
-    u8 key, dx, dy;
+    u8 key;
+    point dir;
 
     gr(true);
     gr_clear();
 
-    p1.x = 13;
-    p1.y = 10;
-    p1.x = 26;
-    p1.y = 10;
-    while (1) {
-        draw(p1.x, p1.y, magenta);
-        draw(p2.x, p2.y, dark_blue);
+    p1.pos = {13, 10};
+    p1.color = magenta;
 
-        key = cgetc();
-        p1_dir(key, &dx, &dy);
-        p1.x += dx;
-        p1.y += dy;
-        p2_dir(key, &dx, &dy);
-        p2.x += dx;
-        p2.y += dy;
+    p2.pos = {26, 10};
+    p2.color = dark_blue;
+
+    while (1) {
+        draw(&p1);
+        draw(&p2);
+
+        for (i = 0; i < 1000; i++) {
+            key = try_getc();
+
+            // Note that we always run the loop body, so that each "tick" takes
+            // a similar amount of time, regardless of whether a key is pressed.
+
+            dir = p1_dir(key);
+            if (dir != zero) p1.dir = dir;
+            dir = p2_dir(key);
+            if (dir != zero) p2.dir = dir;
+        }
+
+        move(&p1);
+        move(&p2);
     }
     return 0;
 }
 
+// Non-blocking keyboard input.
+//
+// Return 0 if there's no keypress in the input buffer.
+u8 try_getc() {
+    if (READ(0xC000) & 0x80) {
+        return cgetc();
+    } else {
+        return 0;
+    }
+}
+
+void draw(player *p) {
+    draw_pixel(p.pos, p.color);
+}
+
+void move(player *p) {
+    p.pos.x += p.dir.x;
+    p.pos.y += p.dir.y;
+}
+
 // WASD to move in a cardinal direction.
 // All other keys return 0.
-void p1_dir(u8 key, u8 *dx, u8 *dy) {
-    *dx = *dy = 0;
+point p1_dir(u8 key) {
     switch (key) {
     case 87: case 119: // up
-        key_y = -1;
-        break;
+        return {0, -1};
     case 83: case 115: // down
-        key_y = 1;
-        break;
+        return {0, 1};
     case 65: case 97: // left
-        key_x = -1;
-        break;
+        return {-1, 0};
     case 68: case 100: // right
-        key_x = 1;
-        break;
+        return {1, 0};
+    default:
+        return {0, 0};
     }
 }
 
 // OKL; to move in a cardinal direction.
 // All other keys return 0.
-void p2_dir(u8 key, u8 *dx, u8 *dy) {
-    *dx = *dy = 0;
+point p2_dir(u8 key) {
     switch (key) {
     case 79: case 111: // up
-        key_y = -1;
-        break;
+        return {0, -1};
     case 76: case 108: // down
-        key_y = 1;
-        break;
+        return {0, 1};
     case 75: case 107: // left
-        key_x = -1;
-        break;
+        return {-1, 0};
     case 58: case 59: // right
-        key_x = 1;
-        break;
+        return {1, 0};
+    default:
+        return {0, 0};
     }
 }
 
@@ -119,7 +151,7 @@ void gr_clear() {
     memset(ADDR(0x400), 0, 0x400);
 }
 
-void draw(u8 x, u8 y, u8 color) {
+void draw_pixel(u8 x, u8 y, u8 color) {
     WRITE(gr_coord_to_addr(x, y), color << 4 | color);
 }
 
