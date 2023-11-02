@@ -35,10 +35,42 @@ enum low_res_color {
 };
 
 int main() {
+    u8 x, y, key, dx, dy;
+
     gr(true);
     gr_clear();
-    draw(20, 10, red);
+
+    x = 20;
+    y = 10;
+    while (1) {
+        draw(x, y, red);
+
+        key = cgetc();
+        p1_dir(key, &dx, &dy);
+        x += dx;
+        y += dy;
+    }
     return 0;
+}
+
+// WASD to move in a cardinal direction.
+// All other keys return 0.
+void p1_dir(u8 key, u8 *dx, u8 *dy) {
+    *dx = *dy = 0;
+    switch (key) {
+    case 87: case 119: // up
+        key_y = -1;
+        break;
+    case 83: case 115: // down
+        key_y = 1;
+        break;
+    case 65: case 97: // left
+        key_x = -1;
+        break;
+    case 68: case 100: // right
+        key_x = 1;
+        break;
+    }
 }
 
 // Toggle graphics mode.
