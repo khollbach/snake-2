@@ -8,3 +8,5 @@
     [x] add logic to the first-input loop to set player color
     [x] remember each player's color between games
 [x] instructions between games
+[ ] try it out
+> Ok, it's extremely glitched, let's investigate a bit and find out why
