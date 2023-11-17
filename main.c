@@ -106,12 +106,13 @@ void play(u8 p1_start_color, u8 p2_start_color) {
 
     // Show instructions.
     mixed(true);
-    cprintf("   W                               I    \r\n");
-    cprintf("  ASD                             JKL   \r\n");
-    cprintf("                                        \r\n");
+    gotoxy(0, 20);
+    cprintf("   W                               I    ");
+    cprintf("  ASD                             JKL   ");
+    cprintf("                                        ");
+    cprintf("                                        ");
 
     // Wait until both players input an initial direction.
-    // Then move them each one step.
     while (1) {
         print_ready(nonzero(p1.dir), nonzero(p2.dir));
 
@@ -136,8 +137,6 @@ void play(u8 p1_start_color, u8 p2_start_color) {
         }
 
         if (nonzero(p1.dir) && nonzero(p2.dir)) {
-            move(&p1);
-            move(&p2);
             break;
         }
     }
@@ -146,6 +145,12 @@ void play(u8 p1_start_color, u8 p2_start_color) {
     mixed(false);
     gr_clear();
     draw_walls();
+    draw(&p1);
+    draw(&p2);
+
+    // Move both players one step before waiting for input again.
+    move(&p1);
+    move(&p2);
 
     // Game loop.
     while (1) {
@@ -174,8 +179,9 @@ void play(u8 p1_start_color, u8 p2_start_color) {
         move(&p2);
 
         if (check_gameover(&p1, &p2)) {
-            // note: this will overflow the stack after a couple hundred games
-            play(p1.color, p2.color); // restart
+            // restart
+            play(p1.color, p2.color);
+            return;
         }
     }
 
@@ -183,15 +189,16 @@ void play(u8 p1_start_color, u8 p2_start_color) {
 }
 
 void print_ready(bool p1, bool p2) {
+    gotoxy(0, 23);
     if (!p1 && !p2) {
-        cprintf("\rPLAYER 1                        PLAYER 2");
+        cprintf("PLAYER 1                        PLAYER 2");
     } else if (!p1 && p2) {
-        cprintf("\rPLAYER 1                         READY! ");
+        cprintf("PLAYER 1                         READY! ");
     } else if (p1 && !p2) {
-        cprintf("\r READY !                        PLAYER 2");
+        cprintf(" READY !                        PLAYER 2");
     } else {
         assert(p1 && p2);
-        cprintf("\r READY!                          READY! ");
+        cprintf(" READY!                          READY! ");
     }
 }
 
@@ -344,12 +351,12 @@ u8 p1_color(u8 keypress) {
     case 49: return 2;
     case 50: return 3;
     case 51: return 4;
-    case 52: return 6;
-    case 53: return 7; // skip grey_1
+    case 52: return 6; // (skip grey_1)
+    case 53: return 7;
     case 54: return 8;
     case 55: return 9;
-    case 56: return 11;
-    case 57: return 12; // skip grey_2
+    case 56: return 11; // (skip grey_2)
+    case 57: return 12;
     case 48: return 13;
     case 45: return 14;
     case 61: return 15;
@@ -367,12 +374,12 @@ u8 p2_color(u8 keypress) {
     case 33: return 2;
     case 64: return 3;
     case 35: return 4;
-    case 36: return 6;
-    case 37: return 7; // skip grey_1
+    case 36: return 6; // (skip grey_1)
+    case 37: return 7;
     case 94: return 8;
     case 38: return 9;
-    case 42: return 11;
-    case 40: return 12; // skip grey_2
+    case 42: return 11; // (skip grey_2)
+    case 40: return 12;
     case 41: return 13;
     case 95: return 14;
     case 43: return 15;
