@@ -231,6 +231,9 @@ bool check_gameover(player *p1, player *p2) {
 }
 
 // Draw walls around the edge of the arena.
+//
+// todo: this is really slow. Maybe re-write it in assembly, or find a relevant
+// library function?
 void draw_walls() {
     i8 x, y;
     point p;
