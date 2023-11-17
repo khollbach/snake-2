@@ -230,29 +230,39 @@ bool check_gameover(player *p1, player *p2) {
     return gameover;
 }
 
+// This is plenty fast, but it's using text-mode glyphs to draw the lines, e.g.
+// "-------------" is a horizontal line, so it looks glitchy in gr mode.
+void draw_walls_fast() {
+    chlinexy(0, 0, dims.x);
+    chlinexy(0, dims.y - 1, dims.x);
+    cvlinexy(0, 0, dims.y);
+    cvlinexy(dims.x - 1, 0, dims.y);
+}
+
 // Draw walls around the edge of the arena.
 //
 // todo: this is really slow. Maybe re-write it in assembly, or find a relevant
 // library function?
 void draw_walls() {
-    i8 x, y;
-    point p;
-    for (x = 0; x < dims.x; x++) {
-        p.x = x;
-        p.y = 0;
-        draw_pixel(p, grey_1);
-        p.x = x;
-        p.y = dims.y - 1;
-        draw_pixel(p, grey_1);
-    }
-    for (y = 0; y < dims.y; y++) {
-        p.x = 0;
-        p.y = y;
-        draw_pixel(p, grey_1);
-        p.x = dims.x - 1;
-        p.y = y;
-        draw_pixel(p, grey_1);
-    }
+    draw_walls_fast();
+    // i8 x, y;
+    // point p;
+    // for (x = 0; x < dims.x; x++) {
+    //     p.x = x;
+    //     p.y = 0;
+    //     draw_pixel(p, grey_1);
+    //     p.x = x;
+    //     p.y = dims.y - 1;
+    //     draw_pixel(p, grey_1);
+    // }
+    // for (y = 0; y < dims.y; y++) {
+    //     p.x = 0;
+    //     p.y = y;
+    //     draw_pixel(p, grey_1);
+    //     p.x = dims.x - 1;
+    //     p.y = y;
+    //     draw_pixel(p, grey_1);
+    // }
 }
 
 bool in_bounds(point p) {
