@@ -8,7 +8,36 @@
     [x] add logic to the first-input loop to set player color
     [x] remember each player's color between games
 [x] instructions between games
-[ ] try it out
-> Ok, it's extremely glitched, let's investigate a bit and find out why
+[x] try it out
 
-Feature request from Sammy: score board
+---
+
+Feature requests from Sammy:
+* score board
+* instructions / game-start isn't clear
+
+Feature requests from Evan and Peter? (what was that person's name??)
+* 321 start
+* keeping score
+* matches
+
+---
+
+next:
+[ ] plan the ux
+
+---
+
+UX ideas
+* make the arena 3x2 dims:
+    * 34x23 including the walls
+    * 3 spaces padding on left and right sides
+    * 1 space padding *either* above or below (tbd)
+    * this encourages ties until ppl figure out how to play
+
+Qs:
+* how to make ppl realize they can change colors?
+* what to show players at the start?
+* what to show players b/w games
+* how to do a count-down for game start
+* score-keeping / match UX ?

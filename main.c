@@ -87,13 +87,13 @@ void play(u8 p1_start_color, u8 p2_start_color) {
     point dir;
     point p1_input, p2_input;
 
-    p1.pos.x = 13;
-    p1.pos.y = 10;
+    p1.pos.x = dims.x / 3;
+    p1.pos.y = dims.y / 2;
     p1.color = p1_start_color;
     p1.dir = zero;
 
-    p2.pos.x = 26;
-    p2.pos.y = 10;
+    p2.pos.x = dims.x * 2 / 3;
+    p2.pos.y = dims.y / 2;
     p2.color = p2_start_color;
     p2.dir = zero;
 
