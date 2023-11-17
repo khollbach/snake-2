@@ -341,11 +341,11 @@ point p2_dir(u8 key) {
     case 73: case 105: // up
         p.y = -1;
         break;
-    case 74: case 106: // down
-        p.y = 1;
-        break;
-    case 75: case 107: // left
+    case 74: case 106: // left
         p.x = -1;
+        break;
+    case 75: case 107: // down
+        p.y = 1;
         break;
     case 76: case 108: // right
         p.x = 1;
