@@ -1,19 +1,10 @@
 #include <assert.h>
-#include <stdint.h>
 #include <stdio.h>
 #include <conio.h>
 #include <string.h>
 #include <stdbool.h>
 
-typedef uint8_t u8;
-typedef int8_t i8;
-typedef uint16_t u16;
-typedef int16_t i16;
-
-char _read_val; // needed so the compiler doesn't optimize away the read
-#define ADDR(a) ((char*)a)
-#define READ(a) (_read_val = *ADDR(a))
-#define WRITE(a, x) (*ADDR(a) = x)
+#include "memory.h"
 
 enum low_res_color {
     black = 0,
@@ -420,7 +411,7 @@ void mixed(bool enable) {
 
 // Write black to all pixels in low-res page 1.
 void gr_clear() {
-    memset(ADDR(0x400), 0, 0x400);
+    memset((void*) 0x400, 0, 0x400);
 }
 
 void draw_pixel(point p, u8 color) {
