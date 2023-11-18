@@ -23,21 +23,45 @@ Feature requests from Evan and Peter? (what was that person's name??)
 
 ---
 
-next:
-[ ] plan the ux
-
----
-
 UX ideas
 * make the arena 3x2 dims:
     * 34x23 including the walls
     * 3 spaces padding on left and right sides
-    * 1 space padding *either* above or below (tbd)
+    * 1 space above the arena
     * this encourages ties until ppl figure out how to play
+    * UPDATE: don't pad the sides; this should create interesting strategy
 
 Qs:
-* how to make ppl realize they can change colors?
-* what to show players at the start?
-* what to show players b/w games
-* how to do a count-down for game start
-* score-keeping / match UX ?
+[x] what to show players at the start?
+[x] how to do a count-down for game start?
+[x] what to show players b/w games?
+[x] score-keeping / match UX ?
+
+[-] how to make ppl realize they can change colors?
+    * maybe add q/e to switch left/right (and u/o for p2)
+    * having both options makes it more likely to be discovered
+    * this should work from any non-arena screen, at any time.
+    * then again, this still doesn't feel great...
+    * maybe some sort of cheat-code thing? idk.
+    * this is very low priority; come back to it when you're done everything else
+    * see also this source code comment:
+    // todo: change colors to not include white (15), and not use `~ key
+
+---
+
+Now:
+
+[ ] figure out splitting into multiple files
+    * I think this'd help organize things better
+    * we can probably use wildcards in the makefile to simplify things
+
+Features to impl:
+[ ] 3, 2, 1, start
+[ ] display score at start screen
+[ ] show victory screen at 5 wins
+
+    cprintf("   W              3...             I    ");
+    cprintf("  ASD  (READY!)   2...  (READY!)  JKL   ");
+    cprintf("                  1...                  ");
+    cprintf("PLAYER 1                        PLAYER 2");
+
