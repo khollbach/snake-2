@@ -1,7 +1,4 @@
 #include <assert.h>
-#include <stdio.h>
-#include <conio.h>
-#include <string.h>
 #include <stdbool.h>
 
 #include "../util/int.h"
@@ -19,6 +16,9 @@ typedef enum {
     p2_win,
     tie,
 } gameover;
+
+// The coordinates of the top-left wall tile.
+const point arena_top_left = {0, 1};
 
 void play_match(player *p1, player *p2);
 void play_game(player *p1, player *p2);
@@ -154,24 +154,21 @@ gameover check_gameover(player *p1, player *p2) {
 
 // Draw walls around the edge of the arena.
 void draw_walls() {
-    // A naive for-loop was too slow (maybe we're supposed to turn on optimizations
-    // in the compiler?) so we're using these library routines instead.
-    //
-    // It's plenty fast, but it's using text-mode glyphs to draw the lines,
-    // e.g.  "-------------" is a horizontal line, so it looks kinda glitchy in
-    // gr mode. But honestly, it's growing on me, so we'll keep it for now.
-    chlinexy(0, 0, dims.x);
-    chlinexy(0, dims.y - 1, dims.x);
-    cvlinexy(0, 0, dims.y);
-    cvlinexy(dims.x - 1, 0, dims.y);
+    rect box;
+    box.top_left = arena_top_left;
+    box.bot_right = dims;
+    draw_box(box);
 }
 
+// Is `p` inside the walls?
 bool in_bounds(point p) {
-    point one_one = {1, 1};
-    rect bounds;
+    rect outer, inner;
 
-    // off-by-ones to account for walls around the edge of the area
-    bounds.top_left = one_one;
-    bounds.bot_right = minus(dims, one_one);
-    return rect_contains(bounds, p);
+    outer.top_left = arena_top_left;
+    outer.bot_right = dims;
+
+    inner.top_left = plus(outer.top_left, one_one);
+    inner.bot_right = minus(outer.bot_right, one_one);
+
+    return rect_contains(inner, p);
 }

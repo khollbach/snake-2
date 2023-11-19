@@ -11,12 +11,13 @@ typedef struct {
 } point;
 
 typedef struct {
-    point top_left;
-    point bot_right;
+    point top_left; // inclusive
+    point bot_right; // exclusive
 } rect;
 
 extern const point zero;
 extern const point dims;
+extern const point one_one;
 
 point plus(point p1, point p2);
 point minus(point p1, point p2);

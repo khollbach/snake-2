@@ -32,6 +32,10 @@ void start_screen(player *p1, player *p2) {
 
     display_score(p1->score, p2->score);
 
+    // Clear the input buffer, in case someone pressed a key while ProDOS was
+    // booting, or during the death animation between games.
+    try_getc();
+
     // Wait until both players input an initial direction.
     while (1) {
         p1_ready = nonzero(p1->dir);

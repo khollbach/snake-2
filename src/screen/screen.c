@@ -1,5 +1,6 @@
 #include <string.h>
 #include <assert.h>
+#include <conio.h>
 
 #include "screen.h"
 #include "../util/memory.h"
@@ -29,6 +30,27 @@ void gr_clear() {
 
 void draw_pixel(point p, u8 color) {
     WRITE(coord_to_addr(p), color << 4 | color);
+}
+
+// Note that `rect` indices exlude the bottom-right point.
+//
+// A naive for-loop was too slow (maybe we're supposed to turn on optimizations
+// in the compiler?) so we're using library routines instead.
+//
+// It's plenty fast, but it's using text-mode glyphs to draw the lines,
+// e.g. "-------------" is a horizontal line, so it looks kinda glitchy in
+// gr mode. But honestly, it's growing on me, so we'll keep it for now.
+void draw_box(rect r) {
+    i8 dx = r.bot_right.x - r.top_left.x;
+    i8 dy = r.bot_right.y - r.top_left.y;
+
+    // Make indices inclusive.
+    r.bot_right = minus(r.bot_right, one_one);
+
+    chlinexy(r.top_left.x, r.top_left.y, dx); // top
+    chlinexy(r.top_left.x, r.bot_right.y, dx); // bottom
+    cvlinexy(r.top_left.x, r.top_left.y, dy); // left
+    cvlinexy(r.bot_right.x, r.top_left.y, dy); // right
 }
 
 // What is the memory address for this low-res pixel?

@@ -2,6 +2,7 @@
 
 const point zero = {0, 0};
 const point dims = {40, 24};
+const point one_one = {1, 1};
 
 point plus(point p1, point p2) {
     point p;
@@ -25,7 +26,8 @@ bool nonzero(point p) {
     return !eq(p, zero);
 }
 
+// Exclusive of the bottom-right point.
 bool rect_contains(rect r, point p) {
-    return r.top_left.x <= p.x && p.x <= r.bot_right.x &&
+    return r.top_left.x <= p.x && p.x < r.bot_right.x &&
         r.top_left.y <= p.y && p.y < r.bot_right.y;
 }
