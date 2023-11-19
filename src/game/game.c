@@ -9,22 +9,14 @@
 #include "../screen/color.h"
 #include "../screen/point.h"
 #include "../screen/screen.h"
+#include "player.h"
 #include "keyboard.h"
-
-typedef struct {
-    point pos;
-    point dir;
-    u8 color;
-} player;
+#include "start_screen.h"
 
 void play_game(u8 p1_color, u8 p2_color);
-void print_ready(bool p1, bool p2);
 bool check_gameover(player *p1, player *p2);
 void draw_walls();
 bool in_bounds(point p);
-void draw(player *p);
-void move(player *p);
-void move_backwards(player *p);
 
 // Returns never.
 void start() {
@@ -38,7 +30,7 @@ void start() {
 void play_game(u8 p1_start_color, u8 p2_start_color) {
     player p1, p2;
     u16 i;
-    u8 key, color;
+    u8 key;
     point dir;
     point p1_input, p2_input;
 
@@ -52,54 +44,14 @@ void play_game(u8 p1_start_color, u8 p2_start_color) {
     p2.color = p2_start_color;
     p2.dir = zero;
 
-    gr(true);
-    gr_clear();
-
-    // Draw initial positions.
-    draw(&p1);
-    draw(&p2);
-
-    // Show instructions.
-    mixed(true);
-    gotoxy(0, 20);
-    cprintf("   W                               I    ");
-    cprintf("  ASD                             JKL   ");
-    cprintf("                                        ");
-    cprintf("                                        ");
-
-    // Wait until both players input an initial direction.
-    while (1) {
-        print_ready(nonzero(p1.dir), nonzero(p2.dir));
-
-        key = cgetc();
-        dir = p1_dir(key);
-        if (nonzero(dir)) p1.dir = dir;
-        dir = p2_dir(key);
-        if (nonzero(dir)) p2.dir = dir;
-
-        // Also check for color-changes.
-        // Player 1 can press keys on the number row to change color.
-        // Player 2 can do the same while holding shift.
-        color = p1_color(key);
-        if (color != 0) {
-            p1.color = color;
-            draw(&p1);
-        }
-        color = p2_color(key);
-        if (color != 0) {
-            p2.color = color;
-            draw(&p2);
-        }
-
-        if (nonzero(p1.dir) && nonzero(p2.dir)) {
-            break;
-        }
-    }
+    start_screen(&p1, &p2);
 
     // Erase instructions, and use the full screen for the arena.
     mixed(false);
     gr_clear();
     draw_walls();
+
+    // Re-draw initial positions.
     draw(&p1);
     draw(&p2);
 
@@ -134,26 +86,12 @@ void play_game(u8 p1_start_color, u8 p2_start_color) {
         move(&p2);
 
         if (check_gameover(&p1, &p2)) {
-            // restart
+            // Restart.
+            //
+            // cc65 probably doesn't do tail-call elimination, so this will
+            // overflow the stack after a couple hundred games.
             play_game(p1.color, p2.color);
-            return;
         }
-    }
-
-    assert(false); // unreachable
-}
-
-void print_ready(bool p1, bool p2) {
-    gotoxy(0, 23);
-    if (!p1 && !p2) {
-        cprintf("PLAYER 1                        PLAYER 2");
-    } else if (!p1 && p2) {
-        cprintf("PLAYER 1                         READY! ");
-    } else if (p1 && !p2) {
-        cprintf(" READY !                        PLAYER 2");
-    } else {
-        assert(p1 && p2);
-        cprintf(" READY!                          READY! ");
     }
 }
 
@@ -165,7 +103,8 @@ void print_ready(bool p1, bool p2) {
 // If no collision, return false.
 bool check_gameover(player *p1, player *p2) {
     bool p1_loss, p2_loss, gameover;
-    u16 i, j;
+    u8 i;
+    u16 time;
 
     p1_loss = !in_bounds(p1->pos) || READ(coord_to_addr(p1->pos));
     p2_loss = !in_bounds(p2->pos) || READ(coord_to_addr(p2->pos));
@@ -178,7 +117,7 @@ bool check_gameover(player *p1, player *p2) {
         for (i = 0; i < 8; i++) {
             if (p1_loss) draw_pixel(p1->pos, i % 2 ? p1->color : black);
             if (p2_loss) draw_pixel(p2->pos, i % 2 ? p2->color : black);
-            for (j = 0; j < 1000; j++); // timing
+            for (time = 0; time < 1000; time++);
         }
     }
 
@@ -207,16 +146,4 @@ bool in_bounds(point p) {
     bounds.top_left = one_one;
     bounds.bot_right = minus(dims, one_one);
     return rect_contains(bounds, p);
-}
-
-void draw(player *p) {
-    draw_pixel(p->pos, p->color);
-}
-
-void move(player *p) {
-    p->pos = plus(p->pos, p->dir);
-}
-
-void move_backwards(player *p) {
-    p->pos = minus(p->pos, p->dir);
 }

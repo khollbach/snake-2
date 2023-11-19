@@ -54,12 +54,7 @@ Qs:
 Now:
 
 Features to impl:
-[ ] 3, 2, 1, start
+[x] 3, 2, 1, start
 [ ] display score at start screen
 [ ] show victory screen at 5 wins
-
-    cprintf("   W              3...             I    ");
-    cprintf("  ASD  (READY!)   2...  (READY!)  JKL   ");
-    cprintf("                  1...                  ");
-    cprintf("PLAYER 1                        PLAYER 2");
 
