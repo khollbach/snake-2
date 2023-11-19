@@ -23,20 +23,11 @@ Feature requests from Evan and Peter? (what was that person's name??)
 
 ---
 
-UX ideas
-* make the arena 3x2 dims:
-    * 34x23 including the walls
-    * 3 spaces padding on left and right sides
-    * 1 space above the arena
-    * this encourages ties until ppl figure out how to play
-    * UPDATE: don't pad the sides; this should create interesting strategy
-
 Qs:
 [x] what to show players at the start?
 [x] how to do a count-down for game start?
 [x] what to show players b/w games?
 [x] score-keeping / match UX ?
-
 [-] how to make ppl realize they can change colors?
     * maybe add q/e to switch left/right (and u/o for p2)
     * having both options makes it more likely to be discovered
@@ -55,6 +46,6 @@ Now:
 
 Features to impl:
 [x] 3, 2, 1, start
-[ ] display score at start screen
+[x] display score at start screen
 [ ] show victory screen at 5 wins
 

@@ -4,10 +4,12 @@
 #include "start_screen.h"
 #include "player.h"
 #include "keyboard.h"
+#include "digit.h"
 #include "../util/int.h"
 #include "../screen/screen.h"
 
 void print_instructions();
+void display_score(u8 p1_score, u8 p2_score);
 void print_ready(bool p1, bool p2);
 void handle_keypress(u8 key, player *p1, player *p2);
 void countdown(player *p1, player *p2);
@@ -27,6 +29,8 @@ void start_screen(player *p1, player *p2) {
     // Draw initial positions.
     draw(p1);
     draw(p2);
+
+    display_score(p1->score, p2->score);
 
     // Wait until both players input an initial direction.
     while (1) {
@@ -50,6 +54,17 @@ void print_instructions() {
     cprintf("  ASD                             JKL   ");
     cprintf("                                        ");
     cprintf("PLAYER 1                        PLAYER 2");
+}
+
+void display_score(u8 p1_score, u8 p2_score) {
+    point coord1 = {2, 2};
+    point coord2 = {35, 2};
+
+    // Don't display anything until someone scores a point.
+    if (!p1_score && !p2_score) return;
+
+    display_digit(coord1, p1_score);
+    display_digit(coord2, p2_score);
 }
 
 void print_ready(bool p1, bool p2) {
