@@ -44,16 +44,14 @@ Qs:
     * then again, this still doesn't feel great...
     * maybe some sort of cheat-code thing? idk.
     * this is very low priority; come back to it when you're done everything else
-    * see also this source code comment:
-    // todo: change colors to not include white (15), and not use `~ key
+    * tbh probably just some text on the start screen ?
+        ~ NUMBERS/SYMBOLS
+          TO CHANGE COLOR
+    * ^possibly only show it when score is 0/0
 
 ---
 
 Now:
-
-[ ] figure out splitting into multiple files
-    * I think this'd help organize things better
-    * we can probably use wildcards in the makefile to simplify things
 
 Features to impl:
 [ ] 3, 2, 1, start
