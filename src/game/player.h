@@ -11,6 +11,7 @@ typedef struct {
     u8 score;
 } player;
 
+void init_positions(player *p1, player *p2);
 void draw(player *p);
 void move(player *p);
 void move_backwards(player *p);

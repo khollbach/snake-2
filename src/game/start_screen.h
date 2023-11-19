@@ -4,5 +4,6 @@
 #include "player.h"
 
 void start_screen(player *p1, player *p2);
+void match_end_screen(player *p1, player *p2);
 
 #endif

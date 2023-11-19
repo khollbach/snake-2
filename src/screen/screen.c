@@ -28,6 +28,17 @@ void gr_clear() {
     memset((void*) 0x400, 0, 0x400);
 }
 
+void mixed_clear() {
+    u8 i;
+
+    gr_clear();
+
+    gotoxy(0, 20);
+    for (i = 0; i < 40 * 4; i++) {
+        cputc(' ');
+    }
+}
+
 void draw_pixel(point p, u8 color) {
     WRITE(coord_to_addr(p), color << 4 | color);
 }

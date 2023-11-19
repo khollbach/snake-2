@@ -42,9 +42,11 @@ void play_match(player *p1, player *p2) {
     p1->score = 0;
     p2->score = 0;
 
-    while (1) { // todo: victory screen at 5 wins
+    while (p1->score < 5 && p2->score < 5) {
         play_game(p1, p2);
     }
+
+    match_end_screen(p1, p2);
 }
 
 // Updates the winner's score. (Ties are possible.)
@@ -54,14 +56,7 @@ void play_game(player *p1, player *p2) {
     point dir;
     point p1_input, p2_input;
 
-    p1->pos.x = dims.x / 3;
-    p1->pos.y = dims.y / 2;
-    p1->dir = zero;
-
-    p2->pos.x = dims.x * 2 / 3;
-    p2->pos.y = dims.y / 2;
-    p2->dir = zero;
-
+    init_positions(p1, p2);
     start_screen(p1, p2);
 
     // Erase instructions, and use the full screen for the arena.

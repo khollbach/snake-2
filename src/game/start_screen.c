@@ -1,4 +1,5 @@
 #include <stdbool.h>
+#include <assert.h>
 #include <conio.h>
 
 #include "start_screen.h"
@@ -22,13 +23,13 @@ void start_screen(player *p1, player *p2) {
 
     gr(true);
     mixed(true);
-
-    gr_clear();
-    print_instructions();
+    mixed_clear();
 
     // Draw initial positions.
     draw(p1);
     draw(p2);
+
+    print_instructions();
 
     display_score(p1->score, p2->score);
 
@@ -37,6 +38,8 @@ void start_screen(player *p1, player *p2) {
     try_getc();
 
     // Wait until both players input an initial direction.
+    p1->dir = zero;
+    p2->dir = zero;
     while (1) {
         p1_ready = nonzero(p1->dir);
         p2_ready = nonzero(p2->dir);
@@ -50,6 +53,48 @@ void start_screen(player *p1, player *p2) {
     }
 
     countdown(p1, p2);
+}
+
+void match_end_screen(player *p1, player *p2) {
+    u8 winner, key;
+    u16 time;
+
+    if (p1->score == 5) {
+        winner = 1;
+    } else {
+        assert(p2->score == 5);
+        winner = 2;
+    }
+
+    gr(true);
+    mixed(true);
+    mixed_clear();
+
+    init_positions(p1, p2);
+    draw(p1);
+    draw(p2);
+
+    display_score(p1->score, p2->score);
+
+    gotoxy(13, 20);
+    cprintf("PLAYER %d WINS!", winner);
+
+    // Pause for a moment.
+    for (time = 0; time < 10 * 1000; time++) {
+        // Listen for color change.
+        if ((key = try_getc())) {
+            handle_keypress(key, p1, p2);
+        }
+    }
+
+    gotoxy(6, 23);
+    cprintf("PRESS SPACE BAR TO PLAY AGAIN");
+
+    // Wait for spacebar.
+    while ((key = cgetc()) != ' ') {
+        // Listen for color change.
+        handle_keypress(key, p1, p2);
+    }
 }
 
 void print_instructions() {

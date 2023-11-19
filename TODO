@@ -48,6 +48,6 @@ Features to impl:
 [x] 3, 2, 1, start
 [x] display score at start screen
 [x] adjust arena size & player start pos'ns
+[x] show victory screen at 5 wins
 [ ] fix inputs getting eaten when both players press a key
-[ ] show victory screen at 5 wins
 
