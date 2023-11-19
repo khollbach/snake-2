@@ -49,5 +49,7 @@ Features to impl:
 [x] display score at start screen
 [x] adjust arena size & player start pos'ns
 [x] show victory screen at 5 wins
-[ ] fix inputs getting eaten when both players press a key
+[x] fix inputs getting eaten when both players press a key
+    * seems like this is only an issue on the emulator?
+      I can't repro it on the physical device.
 
