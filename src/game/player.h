@@ -8,6 +8,7 @@ typedef struct {
     point pos;
     point dir;
     u8 color;
+    u8 score;
 } player;
 
 void draw(player *p);

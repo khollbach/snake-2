@@ -13,38 +13,56 @@
 #include "keyboard.h"
 #include "start_screen.h"
 
-void play_game(u8 p1_color, u8 p2_color);
-bool check_gameover(player *p1, player *p2);
+typedef enum {
+    ongoing,
+    p1_win,
+    p2_win,
+    tie,
+} gameover;
+
+void play_match(player *p1, player *p2);
+void play_game(player *p1, player *p2);
+gameover check_gameover(player *p1, player *p2);
 void draw_walls();
 bool in_bounds(point p);
 
 // Returns never.
 void start() {
-    play_game(magenta, dark_blue);
+    player p1, p2;
+
+    p1.color = magenta;
+    p2.color = dark_blue;
+
+    while (1) {
+        play_match(&p1, &p2);
+    }
 }
 
-// Automatically restarts after each game ends.
-// Player color is remembered between games.
-//
-// Returns never.
-void play_game(u8 p1_start_color, u8 p2_start_color) {
-    player p1, p2;
+void play_match(player *p1, player *p2) {
+    p1->score = 0;
+    p2->score = 0;
+
+    while (1) { // todo: victory screen at 5 wins
+        play_game(p1, p2);
+    }
+}
+
+// Updates the winner's score. (Ties are possible.)
+void play_game(player *p1, player *p2) {
     u16 i;
     u8 key;
     point dir;
     point p1_input, p2_input;
 
-    p1.pos.x = dims.x / 3;
-    p1.pos.y = dims.y / 2;
-    p1.color = p1_start_color;
-    p1.dir = zero;
+    p1->pos.x = dims.x / 3;
+    p1->pos.y = dims.y / 2;
+    p1->dir = zero;
 
-    p2.pos.x = dims.x * 2 / 3;
-    p2.pos.y = dims.y / 2;
-    p2.color = p2_start_color;
-    p2.dir = zero;
+    p2->pos.x = dims.x * 2 / 3;
+    p2->pos.y = dims.y / 2;
+    p2->dir = zero;
 
-    start_screen(&p1, &p2);
+    start_screen(p1, p2);
 
     // Erase instructions, and use the full screen for the arena.
     mixed(false);
@@ -52,21 +70,21 @@ void play_game(u8 p1_start_color, u8 p2_start_color) {
     draw_walls();
 
     // Re-draw initial positions.
-    draw(&p1);
-    draw(&p2);
+    draw(p1);
+    draw(p2);
 
     // Move both players one step before waiting for input again.
-    move(&p1);
-    move(&p2);
+    move(p1);
+    move(p2);
 
     // Game loop.
     while (1) {
-        draw(&p1);
-        draw(&p2);
+        draw(p1);
+        draw(p2);
 
         // Wait for one "tick", while polling for player input.
-        p1_input = p1.dir;
-        p2_input = p2.dir;
+        p1_input = p1->dir;
+        p2_input = p2->dir;
         for (i = 0; i < 20; i++) {
             key = try_getc();
 
@@ -75,43 +93,44 @@ void play_game(u8 p1_start_color, u8 p2_start_color) {
 
             // Note: players can't move backwards into themselves.
             dir = p1_dir(key);
-            if (nonzero(dir) && nonzero(plus(dir, p1.dir))) p1_input = dir;
+            if (nonzero(dir) && nonzero(plus(dir, p1->dir))) p1_input = dir;
             dir = p2_dir(key);
-            if (nonzero(dir) && nonzero(plus(dir, p2.dir))) p2_input = dir;
+            if (nonzero(dir) && nonzero(plus(dir, p2->dir))) p2_input = dir;
         }
-        p1.dir = p1_input;
-        p2.dir = p2_input;
+        p1->dir = p1_input;
+        p2->dir = p2_input;
 
-        move(&p1);
-        move(&p2);
+        move(p1);
+        move(p2);
 
-        if (check_gameover(&p1, &p2)) {
-            // Restart.
-            //
-            // cc65 probably doesn't do tail-call elimination, so this will
-            // overflow the stack after a couple hundred games.
-            play_game(p1.color, p2.color);
+        switch (check_gameover(p1, p2)) {
+        case ongoing:
+            continue;
+        case p1_win:
+            p1->score += 1;
+            return;
+        case p2_win:
+            p2->score += 1;
+            return;
+        case tie:
+            return;
         }
     }
 }
 
 // Check for collisions with a wall or a snake's "tail".
 //
-// If collision is detected, do a "death" animation for the losing player(s),
-// and return true.
-//
-// If no collision, return false.
-bool check_gameover(player *p1, player *p2) {
-    bool p1_loss, p2_loss, gameover;
+// If collision is detected, do a "death" animation for the losing player(s).
+gameover check_gameover(player *p1, player *p2) {
+    bool p1_loss, p2_loss;
     u8 i;
     u16 time;
 
     p1_loss = !in_bounds(p1->pos) || READ(coord_to_addr(p1->pos));
     p2_loss = !in_bounds(p2->pos) || READ(coord_to_addr(p2->pos));
-    gameover = p1_loss || p2_loss;
 
     // Death animation: blink the snake's head for the losing player(s).
-    if (gameover) {
+    if (p1_loss || p2_loss) {
         if (p1_loss) move_backwards(p1);
         if (p2_loss) move_backwards(p2);
         for (i = 0; i < 8; i++) {
@@ -121,7 +140,16 @@ bool check_gameover(player *p1, player *p2) {
         }
     }
 
-    return gameover;
+    if (!p1_loss && !p2_loss) {
+        return ongoing;
+    } else if (p1_loss && p2_loss) {
+        return tie;
+    } else if (p2_loss) {
+        return p1_win;
+    } else {
+        assert(p1_loss);
+        return p2_win;
+    }
 }
 
 // Draw walls around the edge of the arena.
